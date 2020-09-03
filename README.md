@@ -3,4 +3,4 @@
 
 my first repository
 
-some code to make errors
+create errors
