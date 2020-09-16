@@ -1,5 +1,35 @@
-myprivatecreds
-testingtesting.*
-*testingtesting
-testingtesting*
+testing.*
+*testing
+testing*
 *.log
+/.metadata/
+
+# Java related
+target/**
+# If final project ends up being a .jar remember to take it out
+*.jar
+*.war
+*.ear
+*.class
+
+# eclipse specific
+*.pydevproject
+.project
+.metadata
+bin/**
+tmp/**
+tmp/**/*
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.classpath
+.settings/
+.loadpath
+
+# External tool builders
+.externalToolBuilders/
+
+# Locally stored "Eclipse launch configurations"
+*.launch
