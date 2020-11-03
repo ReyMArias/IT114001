@@ -1,3 +1,5 @@
+package Server;
+
 import java.io.Serializable;
 
 public class Payload implements Serializable {
