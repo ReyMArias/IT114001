@@ -5,6 +5,8 @@ import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
+import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -39,11 +41,16 @@ public class ClientUI extends JFrame implements Event {
 	JPanel userPanel;
 	List<User> users = new ArrayList<User>();
 	private final static Logger log = Logger.getLogger(ClientUI.class.getName());
-	Dimension windowSize = new Dimension(400, 400);
+	Dimension windowSize = Toolkit.getDefaultToolkit().getScreenSize();
+	GamePanel game;
+	String username;
 
 	public ClientUI(String title) {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		windowSize.width *= .8;
+		windowSize.height *= .8;
 		setPreferredSize(windowSize);
+		setSize(windowSize);// This is needed for setLocationRelativeTo()
 		setLocationRelativeTo(null);
 		self = this;
 		setTitle(title);
@@ -53,6 +60,7 @@ public class ClientUI extends JFrame implements Event {
 		createUserInputScreen();
 		createPanelRoom();
 		createPanelUserList();
+
 		showUI();
 	}
 
@@ -64,7 +72,7 @@ public class ClientUI extends JFrame implements Event {
 		panel.add(hostLabel);
 		panel.add(host);
 		JLabel portLabel = new JLabel("Port:");
-		JTextField port = new JTextField("3002");
+		JTextField port = new JTextField("3000");
 		panel.add(portLabel);
 		panel.add(port);
 		JButton button = new JButton("Next");
@@ -99,13 +107,22 @@ public class ClientUI extends JFrame implements Event {
 		panel.add(userLabel);
 		panel.add(username);
 		JButton button = new JButton("Join");
+		ClientUI self = this;
 		button.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				String name = username.getText();
 				if (name != null && name.length() > 0) {
-					SocketClient.setUsername(name);
+					// need external ref since "this" context is the action event, not ClientUI
+					self.username = name;
+					// this order matters
+					createDrawingPanel();
+					pack();
+					self.setTitle(self.getTitle() + " - " + self.username);
+					game.setPlayerName(self.username);
+					SocketClient.INSTANCE.setUsername(self.username);
+
 					self.next();
 				}
 			}
@@ -144,7 +161,7 @@ public class ClientUI extends JFrame implements Event {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (text.getText().length() > 0) {
-					SocketClient.sendMessage(text.getText());
+					SocketClient.INSTANCE.sendMessage(text.getText());
 					text.setText("");
 				}
 			}
@@ -168,6 +185,15 @@ public class ClientUI extends JFrame implements Event {
 		scroll.setPreferredSize(d);
 
 		textArea.getParent().getParent().getParent().add(scroll, BorderLayout.EAST);
+	}
+
+	void createDrawingPanel() {
+		game = new GamePanel();
+		game.setPreferredSize(new Dimension((int) (windowSize.width * .6), windowSize.height));
+		textArea.getParent().getParent().getParent().add(game, BorderLayout.WEST);
+
+		// TODO unsubscribe when done
+		SocketClient.INSTANCE.registerCallbackListener(game);
 	}
 
 	void addClient(String name) {
@@ -223,7 +249,7 @@ public class ClientUI extends JFrame implements Event {
 		textArea.add(entry);
 
 		pack();
-		System.out.println(entry.getSize());
+		// System.out.println(entry.getSize());
 		JScrollBar sb = ((JScrollPane) textArea.getParent().getParent()).getVerticalScrollBar();
 		sb.setValue(sb.getMaximum());
 	}
@@ -237,8 +263,8 @@ public class ClientUI extends JFrame implements Event {
 	}
 
 	void connect(String host, String port) throws IOException {
-		SocketClient.callbackListener(this);
-		SocketClient.connectAndStart(host, port);
+		SocketClient.INSTANCE.registerCallbackListener(this);
+		SocketClient.INSTANCE.connectAndStart(host, port);
 	}
 
 	void showUI() {
@@ -296,5 +322,17 @@ public class ClientUI extends JFrame implements Event {
 		if (ui != null) {
 			log.log(Level.FINE, "Started");
 		}
+	}
+
+	@Override
+	public void onSyncDirection(String clientName, Point direction) {
+		// TODO Auto-generated method stub
+		// no need to sync this for ClientUI
+	}
+
+	@Override
+	public void onSyncPosition(String clientName, Point position) {
+		// TODO Auto-generated method stub
+		// no need to sync this for ClientUI
 	}
 }
