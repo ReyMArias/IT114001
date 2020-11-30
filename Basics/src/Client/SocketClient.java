@@ -146,6 +146,16 @@ public enum SocketClient {
 		}
 	}
 
+	private void sendRoom(String roomName) {
+		Iterator<Event> iter = events.iterator();
+		while (iter.hasNext()) {
+			Event e = iter.next();
+			if (e != null) {
+				e.onGetRoom(roomName);
+			}
+		}
+	}
+
 	/***
 	 * Determine any special logic for different PayloadTypes
 	 * 
@@ -171,6 +181,10 @@ public enum SocketClient {
 			break;
 		case SYNC_POSITION:
 			sendSyncPosition(p.getClientName(), p.getPoint());
+			break;
+		case GET_ROOMS:
+			// reply from ServerThread
+			sendRoom(p.getMessage());
 			break;
 		default:
 			log.log(Level.WARNING, "unhandled payload on client" + p);
@@ -217,6 +231,27 @@ public enum SocketClient {
 
 	public void sendMessage(String message) {
 		sendPayload(buildMessage(message));
+	}
+
+	public void sendCreateRoom(String room) {
+		Payload p = new Payload();
+		p.setPayloadType(PayloadType.CREATE_ROOM);
+		p.setMessage(room);
+		sendPayload(p);
+	}
+
+	public void sendJoinRoom(String room) {
+		Payload p = new Payload();
+		p.setPayloadType(PayloadType.JOIN_ROOM);
+		p.setMessage(room);
+		sendPayload(p);
+	}
+
+	public void sendGetRooms(String query) {
+		Payload p = new Payload();
+		p.setPayloadType(PayloadType.GET_ROOMS);
+		p.setMessage(query);
+		sendPayload(p);
 	}
 
 	/**

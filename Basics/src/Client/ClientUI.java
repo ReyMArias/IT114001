@@ -23,6 +23,9 @@ import javax.swing.JButton;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
@@ -44,9 +47,24 @@ public class ClientUI extends JFrame implements Event {
 	Dimension windowSize = Toolkit.getDefaultToolkit().getScreenSize();
 	GamePanel game;
 	String username;
+	RoomsPanel roomsPanel;
+	JMenuBar menu;
 
 	public ClientUI(String title) {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		menu = new JMenuBar();
+		JMenu roomsMenu = new JMenu("Rooms");
+		JMenuItem roomsSearch = new JMenuItem("Search");
+		roomsSearch.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("clicked");
+				goToPanel("rooms");
+			}
+
+		});
+		roomsMenu.add(roomsSearch);
+		menu.add(roomsMenu);
 		windowSize.width *= .8;
 		windowSize.height *= .8;
 		setPreferredSize(windowSize);
@@ -58,9 +76,12 @@ public class ClientUI extends JFrame implements Event {
 		setLayout(card);
 		createConnectionScreen();
 		createUserInputScreen();
+
 		createPanelRoom();
 		createPanelUserList();
-
+		this.setJMenuBar(menu);
+		// TODO remove
+		createRoomsPanel();
 		showUI();
 	}
 
@@ -72,7 +93,7 @@ public class ClientUI extends JFrame implements Event {
 		panel.add(hostLabel);
 		panel.add(host);
 		JLabel portLabel = new JLabel("Port:");
-		JTextField port = new JTextField("3000");
+		JTextField port = new JTextField("3002");
 		panel.add(portLabel);
 		panel.add(port);
 		JButton button = new JButton("Next");
@@ -96,7 +117,7 @@ public class ClientUI extends JFrame implements Event {
 
 		});
 		panel.add(button);
-		this.add(panel);
+		this.add(panel, "login");
 	}
 
 	void createUserInputScreen() {
@@ -129,7 +150,7 @@ public class ClientUI extends JFrame implements Event {
 
 		});
 		panel.add(button);
-		this.add(panel);
+		this.add(panel, "details");
 	}
 
 	void createPanelRoom() {
@@ -169,7 +190,7 @@ public class ClientUI extends JFrame implements Event {
 		});
 		input.add(button);
 		panel.add(input, BorderLayout.SOUTH);
-		this.add(panel);
+		this.add(panel, "lobby");
 	}
 
 	void createPanelUserList() {
@@ -194,6 +215,11 @@ public class ClientUI extends JFrame implements Event {
 
 		// TODO unsubscribe when done
 		SocketClient.INSTANCE.registerCallbackListener(game);
+	}
+
+	void createRoomsPanel() {
+		roomsPanel = new RoomsPanel(this);
+		this.add(roomsPanel, "rooms");
 	}
 
 	void addClient(String name) {
@@ -262,6 +288,20 @@ public class ClientUI extends JFrame implements Event {
 		card.previous(this.getContentPane());
 	}
 
+	void goToPanel(String panel) {
+		switch (panel) {
+		case "rooms":
+			// TODO get rooms
+			roomsPanel.removeAllRooms();
+			SocketClient.INSTANCE.sendGetRooms(null);
+			break;
+		default:
+			// no need to react
+			break;
+		}
+		card.show(this.getContentPane(), panel);
+	}
+
 	void connect(String host, String port) throws IOException {
 		SocketClient.INSTANCE.registerCallbackListener(this);
 		SocketClient.INSTANCE.connectAndStart(host, port);
@@ -315,6 +355,7 @@ public class ClientUI extends JFrame implements Event {
 			removeClient(u);
 			iter.remove();
 		}
+		goToPanel("lobby");
 	}
 
 	public static void main(String[] args) {
@@ -334,5 +375,14 @@ public class ClientUI extends JFrame implements Event {
 	public void onSyncPosition(String clientName, Point position) {
 		// TODO Auto-generated method stub
 		// no need to sync this for ClientUI
+	}
+
+	@Override
+	public void onGetRoom(String roomName) {
+		// TODO Auto-generated method stub
+		if (roomsPanel != null) {
+			roomsPanel.addRoom(roomName);
+			pack();
+		}
 	}
 }

@@ -14,13 +14,13 @@ public abstract class BaseGamePanel extends JPanel {
 	// flag used to terminate game loop
 	protected boolean isRunning = false;
 	// thread sleep time in ms (16 ms is approx 60 frames per second)
-	public int SLEEP = 16;
+	public static int SLEEP = 16;
 	BaseGamePanel bgp;
 	// when true, disables certain triggers the server version doesn't need
 	public boolean isServer = false;
 	// by setting this we can have the instance awake() but not start until
 	// startGameLoop() is called
-	public boolean delayGameLoop = false;
+	public static boolean delayGameLoop = false;
 	private final static Logger log = Logger.getLogger(BaseGamePanel.class.getName());
 	Thread gameLoop;
 

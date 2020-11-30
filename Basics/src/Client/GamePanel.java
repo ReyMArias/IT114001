@@ -255,4 +255,10 @@ public class GamePanel extends BaseGamePanel implements Event {
 			}
 		}
 	}
+
+	@Override
+	public void onGetRoom(String roomName) {
+		// TODO Auto-generated method stub
+
+	}
 }
