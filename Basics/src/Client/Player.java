@@ -15,6 +15,15 @@ public class Player extends GameObject implements Serializable {
 	private static final long serialVersionUID = -6088251166673414031L;
 	Color color = Color.RED;
 	Point nameOffset = new Point(0, 5);
+	boolean isReady = false;
+
+	public void setReady(boolean r) {
+		isReady = r;
+	}
+
+	public boolean isReady() {
+		return isReady;
+	}
 
 	/**
 	 * Gets called by the game engine to draw the current location/size

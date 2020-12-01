@@ -156,6 +156,16 @@ public enum SocketClient {
 		}
 	}
 
+	private void sendSize(Point p) {
+		Iterator<Event> iter = events.iterator();
+		while (iter.hasNext()) {
+			Event e = iter.next();
+			if (e != null) {
+				e.onResize(p);
+			}
+		}
+	}
+
 	/***
 	 * Determine any special logic for different PayloadTypes
 	 * 
@@ -185,6 +195,9 @@ public enum SocketClient {
 		case GET_ROOMS:
 			// reply from ServerThread
 			sendRoom(p.getMessage());
+			break;
+		case SYNC_GAME_SIZE:
+			sendSize(p.getPoint());
 			break;
 		default:
 			log.log(Level.WARNING, "unhandled payload on client" + p);

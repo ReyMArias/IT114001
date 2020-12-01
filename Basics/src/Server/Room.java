@@ -21,8 +21,9 @@ public class Room extends BaseGamePanel implements AutoCloseable {
 	private final static String COMMAND_TRIGGER = "/";
 	private final static String CREATE_ROOM = "createroom";
 	private final static String JOIN_ROOM = "joinroom";
+	private final static String READY = "ready";
 	private List<ClientPlayer> clients = new ArrayList<ClientPlayer>();
-	static Dimension gameAreaSize = new Dimension(400, 600);
+	static Dimension gameAreaSize = new Dimension(800, 800);
 
 	public Room(String name, boolean delayStart) {
 		super(delayStart);
@@ -49,6 +50,16 @@ public class Room extends BaseGamePanel implements AutoCloseable {
 		startPos.x = (int) (Math.random() * gameAreaSize.width);
 		startPos.y = (int) (Math.random() * gameAreaSize.height);
 		return startPos;
+	}
+
+	private void syncGameSize() {
+		Iterator<ClientPlayer> iter = clients.iterator();
+		while (iter.hasNext()) {
+			ClientPlayer cp = iter.next();
+			if (cp != null) {
+				cp.client.sendGameAreaSize(gameAreaSize);
+			}
+		}
 	}
 
 	protected synchronized void addClient(ServerThread client) {
@@ -97,6 +108,7 @@ public class Room extends BaseGamePanel implements AutoCloseable {
 			// calculate random start position
 			Point startPos = Room.getRandomStartPosition();
 			cp.player.setPosition(startPos);
+			cp.client.sendGameAreaSize(gameAreaSize);
 			// tell our client of our server determined position
 			cp.client.sendPosition(cp.client.getClientName(), startPos);
 			// tell everyone else about our server determiend position
@@ -105,6 +117,7 @@ public class Room extends BaseGamePanel implements AutoCloseable {
 			updateClientList(cp.client);
 			// get dir/pos of existing players
 			updatePlayers(cp.client);
+
 		}
 	}
 
@@ -181,6 +194,23 @@ public class Room extends BaseGamePanel implements AutoCloseable {
 		server.joinLobby(client);
 	}
 
+	protected void createRoom(String room, ServerThread client) {
+		if (server.createNewRoom(room)) {
+			joinRoom(room, client);
+		}
+	}
+
+	private ClientPlayer getCP(ServerThread client) {
+		Iterator<ClientPlayer> iter = clients.iterator();
+		while (iter.hasNext()) {
+			ClientPlayer cp = iter.next();
+			if (cp.client == client) {
+				return cp;
+			}
+		}
+		return null;
+	}
+
 	/***
 	 * Helper function to process messages to trigger different functionality.
 	 * 
@@ -201,18 +231,30 @@ public class Room extends BaseGamePanel implements AutoCloseable {
 					command = command.toLowerCase();
 				}
 				String roomName;
+				ClientPlayer cp = null;
 				switch (command) {
 				case CREATE_ROOM:
 					roomName = comm2[1];
-					if (server.createNewRoom(roomName)) {
-						joinRoom(roomName, client);
+					cp = getCP(client);
+					if (cp != null) {
+						createRoom(roomName, cp.client);
 					}
 					wasCommand = true;
 					break;
 				case JOIN_ROOM:
 					roomName = comm2[1];
-					joinRoom(roomName, client);
+					cp = getCP(client);
+					if (cp != null) {
+						joinRoom(roomName, cp.client);
+					}
 					wasCommand = true;
+					break;
+				case READY:
+					cp = getCP(client);
+					if (cp != null) {
+						cp.player.setReady(true);
+						readyCheck();
+					}
 					break;
 				}
 			}
@@ -220,6 +262,18 @@ public class Room extends BaseGamePanel implements AutoCloseable {
 			e.printStackTrace();
 		}
 		return wasCommand;
+	}
+
+	private void readyCheck() {
+		Iterator<ClientPlayer> iter = clients.iterator();
+		int total = clients.size();
+		int ready = 0;
+		while (iter.hasNext()) {
+			ClientPlayer cp = iter.next();
+			if (cp != null && cp.player.isReady()) {
+				ready++;
+			}
+		}
 	}
 
 	protected void sendConnectionStatus(ServerThread client, boolean isConnect, String message) {
@@ -315,8 +369,8 @@ public class Room extends BaseGamePanel implements AutoCloseable {
 		}
 	}
 
-	public List<String> getRooms() {
-		return server.getRooms();
+	public List<String> getRooms(String search) {
+		return server.getRooms(search);
 	}
 
 	/***

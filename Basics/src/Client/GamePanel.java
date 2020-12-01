@@ -1,12 +1,17 @@
 package Client;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.RenderingHints;
+import java.awt.Stroke;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -29,6 +34,7 @@ public class GamePanel extends BaseGamePanel implements Event {
 	Player myPlayer;
 	String playerUsername;// caching it so we don't lose it when room is wiped
 	private final static Logger log = Logger.getLogger(GamePanel.class.getName());
+	Dimension gameAreaSize = new Dimension();
 
 	public void setPlayerName(String name) {
 		playerUsername = name;
@@ -65,8 +71,6 @@ public class GamePanel extends BaseGamePanel implements Event {
 
 	@Override
 	public void onClientDisconnect(String clientName, String message) {
-
-		// TODO Auto-generated method stub
 		System.out.println("Disconnected on Game Panel: " + clientName);
 		Iterator<Player> iter = players.iterator();
 		while (iter.hasNext()) {
@@ -91,10 +95,8 @@ public class GamePanel extends BaseGamePanel implements Event {
 		// players.clear();
 		Iterator<Player> iter = players.iterator();
 		while (iter.hasNext()) {
-			Player p = iter.next();
-			// if (p != myPlayer) {
+			iter.next();
 			iter.remove();
-			// }
 		}
 		myPlayer = null;
 		System.out.println("Cleared players");
@@ -103,10 +105,20 @@ public class GamePanel extends BaseGamePanel implements Event {
 	@Override
 	public void awake() {
 		players = new ArrayList<Player>();
+		GamePanel gp = this;
+		// fix the loss of focus when typing in chat
+		addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				gp.getRootPane().grabFocus();
+			}
+		});
 	}
 
 	@Override
 	public void start() {
+		// TODO goes on server side, here for testing
 
 	}
 
@@ -176,6 +188,7 @@ public class GamePanel extends BaseGamePanel implements Event {
 		((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		drawPlayers(g);
 		drawText(g);
+		drawUI((Graphics2D) g);
 	}
 
 	private synchronized void drawPlayers(Graphics g) {
@@ -194,11 +207,20 @@ public class GamePanel extends BaseGamePanel implements Event {
 		if (myPlayer != null) {
 			g.drawString("Debug MyPlayer: " + myPlayer.toString(), 10, 20);
 		}
+
+	}
+
+	private void drawUI(Graphics2D g2) {
+		Stroke oldStroke = g2.getStroke();
+		g2.setStroke(new BasicStroke(2));
+		g2.drawRect(0, 0, gameAreaSize.width, gameAreaSize.height);
+		g2.setStroke(oldStroke);
 	}
 
 	@Override
 	public void quit() {
 		log.log(Level.INFO, "GamePanel quit");
+		this.removeAll();
 	}
 
 	@Override
@@ -261,4 +283,18 @@ public class GamePanel extends BaseGamePanel implements Event {
 		// TODO Auto-generated method stub
 
 	}
+
+	@Override
+	public void onResize(Point p) {
+		// TODO Auto-generated method stub
+		gameAreaSize = new Dimension(p.x, p.y);
+		this.setPreferredSize(gameAreaSize);
+		this.setMinimumSize(gameAreaSize);
+		this.setMaximumSize(gameAreaSize);
+		this.setSize(gameAreaSize);
+		System.out.println(this.getSize());
+		this.invalidate();
+		this.repaint();
+	}
+
 }
