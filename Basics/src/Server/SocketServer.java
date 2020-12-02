@@ -119,9 +119,9 @@ public class SocketServer {
 			if ((r != null && r.getName() != null)
 					&& (room == null || (room != null && r.getName().toLowerCase().contains(room.toLowerCase())))) {
 				roomNames.add(r.getName());
+				i++;
 			}
 
-			i++;
 			if (i > max) {
 				break;
 			}
