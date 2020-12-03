@@ -18,6 +18,7 @@ public class Player extends GameObject implements Serializable {
 	private Point nameOffset = new Point(0, -5);
 	private boolean isReady = false;
 	private Point barrel = new Point(position.x + (size.width / 2), position.y + (size.height / 2));
+	private int HP = 1;
 
 	public void setDirectionLine(Point dir) {
 		barrel.x = dir.x;
