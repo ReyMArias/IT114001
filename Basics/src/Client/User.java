@@ -29,7 +29,7 @@ public class User extends JPanel {
 			teamText = "blue";
 		}
 
-		nameField.setText("<span style='color:" + teamText + "'>" + name + "</span>");
+		nameField.setText("\u001B31;1m" + name);
 		repaint();
 	}
 }
