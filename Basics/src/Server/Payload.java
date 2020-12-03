@@ -8,6 +8,41 @@ public class Payload implements Serializable {
 	/**
 	 * baeldung.com/java-serial-version-uid
 	 */
+
+	public class PlayerInfo implements Serializable {
+
+		private static final long serialVersionUID = -6687715510484845706L;
+		private int teamId = 0;
+		private int playerId;
+
+		public void setTeamId(int id) {
+			teamId = id;
+		}
+
+		public void setPlayerId(int id) {
+			playerId = id;
+		}
+
+		public int getTeamId() {
+			return teamId;
+		}
+
+		public int getPlayerId() {
+			return playerId;
+		}
+	}
+
+	private PlayerInfo playerInfo = new PlayerInfo();
+
+	public PlayerInfo getPlayerInfo() {
+		return playerInfo;
+	}
+
+	public void setPlayerInfo(int teamID, int playerID) {
+		playerInfo.teamId = teamID;
+		playerInfo.playerId = playerID;
+	}
+
 	private static final long serialVersionUID = -6687715510484845706L;
 
 	private String clientName;// ~2 bytes per character

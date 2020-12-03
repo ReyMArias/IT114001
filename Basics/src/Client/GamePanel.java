@@ -35,6 +35,8 @@ public class GamePanel extends BaseGamePanel implements Event {
 	String playerUsername;// caching it so we don't lose it when room is wiped
 	private final static Logger log = Logger.getLogger(GamePanel.class.getName());
 	Dimension gameAreaSize = new Dimension();
+	private static int teamAScore = 0;
+	private static int teamBScore = 0;
 
 	public void setPlayerName(String name) {
 		playerUsername = name;
@@ -207,6 +209,8 @@ public class GamePanel extends BaseGamePanel implements Event {
 		if (myPlayer != null) {
 			g.drawString("Debug MyPlayer: " + myPlayer.toString(), 10, 20);
 		}
+		g.drawString("Team A Score: " + teamAScore, gameAreaSize.width / 3, 50);
+		g.drawString("Team B Score: " + teamBScore, (int) (gameAreaSize.width * 0.667), 50);
 
 	}
 
@@ -295,6 +299,27 @@ public class GamePanel extends BaseGamePanel implements Event {
 		System.out.println(this.getSize());
 		this.invalidate();
 		this.repaint();
+	}
+
+	@Override
+	public void onChangeTeam(int number) {
+		myPlayer.setTeam(number);
+	}
+
+	@Override
+	public void onSetPlayerColor(int teamId, String clientName) {
+		for (Player player : players) {
+			if (player.getName() == clientName) {
+				if (teamId == 1) {
+					player.setColor(Color.RED);
+				} else {
+					player.setColor(Color.BLUE);
+				}
+				break;
+			}
+		}
+
+		repaint();
 	}
 
 }

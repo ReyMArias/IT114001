@@ -166,6 +166,26 @@ public enum SocketClient {
 		}
 	}
 
+	private void changeTeam(int number) {
+		Iterator<Event> iter = events.iterator();
+		while (iter.hasNext()) {
+			Event e = iter.next();
+			if (e != null) {
+				e.onChangeTeam(number);
+			}
+		}
+	}
+
+	private void setPlayerColor(int teamId, String clientName) {
+		Iterator<Event> iter = events.iterator();
+		while (iter.hasNext()) {
+			Event e = iter.next();
+			if (e != null) {
+				e.onSetPlayerColor(teamId, clientName);
+			}
+		}
+	}
+
 	/***
 	 * Determine any special logic for different PayloadTypes
 	 * 
@@ -198,6 +218,9 @@ public enum SocketClient {
 			break;
 		case SYNC_GAME_SIZE:
 			sendSize(p.getPoint());
+			break;
+		case TEAM:
+			setPlayerColor(p.getNumber(), p.getClientName());
 			break;
 		default:
 			log.log(Level.WARNING, "unhandled payload on client" + p);

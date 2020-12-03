@@ -24,6 +24,8 @@ public class Room extends BaseGamePanel implements AutoCloseable {
 	private final static String READY = "ready";
 	private List<ClientPlayer> clients = new ArrayList<ClientPlayer>();
 	static Dimension gameAreaSize = new Dimension(800, 800);
+	private final static int TEAM_A = 1;
+	private final static int TEAM_B = 2;
 
 	public Room(String name, boolean delayStart) {
 		super(delayStart);
@@ -43,6 +45,20 @@ public class Room extends BaseGamePanel implements AutoCloseable {
 
 	public String getName() {
 		return name;
+	}
+
+	private void teamAssign(ClientPlayer clientPlayer) {
+		int playerId = clientPlayer.player.getId();
+		String name = clientPlayer.client.getClientName();
+
+		if (playerId % 2 == 0) {
+			clientPlayer.player.setTeam(TEAM_A);
+			clientPlayer.client.sendTeamInfo(TEAM_A, name);
+		} else {
+
+			clientPlayer.player.setTeam(TEAM_B);
+			clientPlayer.client.sendTeamInfo(TEAM_B, name);
+		}
 	}
 
 	private static Point getRandomStartPosition() {
@@ -96,15 +112,23 @@ public class Room extends BaseGamePanel implements AutoCloseable {
 			// objects
 			// that's so we don't have to keep track of the same client in two different
 			// list locations
+			client.sendTeamInfo(p.getId() % 2, p.getName());
 			syncClient(cp);
 
 		}
+	}
+
+	private void setPlayerInfo(ClientPlayer c) {
+		c.player.setId(clients.indexOf(c));
+		c.client.sendId(c.player.getId());
+		teamAssign(c);
 	}
 
 	private void syncClient(ClientPlayer cp) {
 		if (cp.client.getClientName() != null) {
 			cp.client.sendClearList();
 			sendConnectionStatus(cp.client, true, "joined the room " + getName());
+			setPlayerInfo(cp);
 			// calculate random start position
 			Point startPos = Room.getRandomStartPosition();
 			cp.player.setPosition(startPos);
@@ -135,8 +159,22 @@ public class Room extends BaseGamePanel implements AutoCloseable {
 			if (c.client != client) {
 				boolean messageSent = client.sendDirection(c.client.getClientName(), c.player.getDirection());
 				if (messageSent) {
-					messageSent = client.sendPosition(c.client.getClientName(), c.player.getPosition());
+					if (client.sendPosition(c.client.getClientName(), c.player.getPosition())) {
+						if (client.sendTeamInfo(c.player.getTeam(), c.client.getClientName())) {
+							syncTeams(c);
+						}
+					}
 				}
+			}
+		}
+	}
+
+	private void syncTeams(ClientPlayer current) {
+		Iterator<ClientPlayer> clientIter = clients.iterator();
+		while (clientIter.hasNext()) {
+			ClientPlayer cp = clientIter.next();
+			if (cp != current) {
+				current.client.sendTeamInfo(cp.player.getTeam(), cp.client.getClientName());
 			}
 		}
 	}

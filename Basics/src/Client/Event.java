@@ -18,4 +18,8 @@ public interface Event {
 	void onGetRoom(String roomName);
 
 	void onResize(Point p);
+
+	void onChangeTeam(int number);
+
+	void onSetPlayerColor(int teamId, String clientName);
 }

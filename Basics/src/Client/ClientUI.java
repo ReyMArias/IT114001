@@ -423,4 +423,22 @@ public class ClientUI extends JFrame implements Event {
 		// ignore it here, I'm sending it to resize the game area
 		resizeTexts();
 	}
+
+	@Override
+	public void onChangeTeam(int number) {
+		repaint();
+	}
+
+	@Override
+	public void onSetPlayerColor(int teamId, String playerName) {
+		for (User user : users) {
+			if (user.getName() == playerName) {
+				user.setUserColor(teamId);
+
+				break;
+			}
+		}
+
+		repaint();
+	}
 }

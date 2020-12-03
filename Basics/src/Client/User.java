@@ -8,6 +8,7 @@ import javax.swing.JTextField;
 public class User extends JPanel {
 	private String name;
 	private JTextField nameField;
+	private String teamText;
 
 	public User(String name) {
 		this.name = name;
@@ -19,5 +20,16 @@ public class User extends JPanel {
 
 	public String getName() {
 		return name;
+	}
+
+	public void setUserColor(int teamId) {
+		if (teamId == 1) {
+			teamText = "red";
+		} else {
+			teamText = "blue";
+		}
+
+		nameField.setText("<span style='color:" + teamText + "'>" + name + "</span>");
+		repaint();
 	}
 }

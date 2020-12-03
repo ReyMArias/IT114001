@@ -44,7 +44,31 @@ public class Player extends GameObject implements Serializable {
 
 	@Override
 	public String toString() {
-		return String.format("Name: %s, p: (%d,%d), s: (%d, %d), d: (%d, %d), isAcitve: %s", name, position.x,
-				position.y, speed.x, speed.y, direction.x, direction.y, isActive);
+		return String.format("Player ID: %d, Name: %s, p: (%d,%d), s: (%d, %d), d: (%d, %d), isAcitve: %s", name,
+				position.x, position.y, speed.x, speed.y, direction.x, direction.y, isActive);
+	}
+
+	@Override
+	public void setTeam(int teamNumber) {
+		switch (teamNumber) {
+		case 1:
+			color = Color.RED;
+			break;
+		case 2:
+			color = Color.BLUE;
+			break;
+		default:
+			break;
+		}
+
+		team = teamNumber;
+	}
+
+	public Color getColor() {
+		return color;
+	}
+
+	public void setColor(Color teamColor) {
+		color = teamColor;
 	}
 }
