@@ -13,9 +13,16 @@ public class Player extends GameObject implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = -6088251166673414031L;
-	Color color = Color.RED;
-	Point nameOffset = new Point(0, 5);
-	boolean isReady = false;
+	private static final int GUN = 2;
+	private Color color = Color.WHITE;
+	private Point nameOffset = new Point(0, -5);
+	private boolean isReady = false;
+	private Point barrel = new Point(position.x + (size.width / 2), position.y + (size.height / 2));
+
+	public void setDirectionLine(Point dir) {
+		barrel.x = dir.x;
+		barrel.y = dir.y;
+	}
 
 	public void setReady(boolean r) {
 		isReady = r;
@@ -38,13 +45,42 @@ public class Player extends GameObject implements Serializable {
 			g.setColor(Color.WHITE);
 			g.setFont(new Font("Monospaced", Font.PLAIN, 12));
 			g.drawString("Name: " + name, position.x + nameOffset.x, position.y + nameOffset.y);
+			if (barrel.x != position.x || barrel.y != position.y) {
+				g.drawLine(position.x + (size.width / 2), position.y + (size.height / 2),
+						position.x + (size.width / 2) + (barrel.x * GUN),
+						position.y + (size.height / 2) + (barrel.y * GUN));
+			}
 		}
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return String.format("Name: %s, p: (%d,%d), s: (%d, %d), d: (%d, %d), isAcitve: %s", name, position.x,
-				position.y, speed.x, speed.y, direction.x, direction.y, isActive);
+		return String.format("Player ID: %d, Name: %s, p: (%d,%d), s: (%d, %d), d: (%d, %d), isActive: %s", id, name,
+				position.x, position.y, speed.x, speed.y, direction.x, direction.y, isActive);
+	}
+
+	@Override
+	public void setTeam(int teamNumber) {
+		switch (teamNumber) {
+		case 1:
+			color = Color.RED;
+			break;
+		case 2:
+			color = Color.BLUE;
+			break;
+		default:
+			break;
+		}
+
+		team = teamNumber;
+	}
+
+	public Color getColor() {
+		return color;
+	}
+
+	public void setColor(Color teamColor) {
+		color = teamColor;
 	}
 }

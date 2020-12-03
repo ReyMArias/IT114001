@@ -142,6 +142,23 @@ public class ServerThread extends Thread {
 		}
 	}
 
+	protected boolean sendId(int idNum) {
+		Payload payload = new Payload();
+		payload.setPayloadType(PayloadType.ID_CARD);
+		payload.setClientName(clientName);
+		payload.setNumber(idNum);
+		return sendPayload(payload);
+	}
+
+	protected boolean sendTeamInfo(int teamId, String clientName) {
+		Payload payload = new Payload();
+		payload.setPayloadType(PayloadType.TEAM);
+		payload.setNumber(teamId);
+		payload.setClientName(clientName);
+
+		return sendPayload(payload);
+	}
+
 	/***
 	 * Process payloads we receive from our client
 	 * 

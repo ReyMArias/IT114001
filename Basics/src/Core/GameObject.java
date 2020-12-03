@@ -17,6 +17,18 @@ public abstract class GameObject implements Serializable {
 	protected Dimension size = new Dimension(25, 25);
 	protected String name = "";
 	protected boolean isActive = true;
+	protected int team = 0;
+	protected int id = 0;
+
+	public void setTeam(int teamNumber) {
+		if (teamNumber < 1) {
+			System.out.println("Invalid team number!");
+			return;
+		}
+
+		System.out.println("Assigned player " + name + " to team " + team);
+		team = teamNumber;
+	}
 
 	/**
 	 * Set the x,y speed of the object, values can only be positive. Set -1 to
@@ -111,6 +123,25 @@ public abstract class GameObject implements Serializable {
 
 	public Point getDirection() {
 		return direction;
+	}
+
+	public int getTeam() {
+		return team;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int ID) {
+		if (ID < 0) {
+			System.out.println("Invalid id");
+			return;
+		}
+
+		id = ID;
+
+		System.out.println("Assigned player " + id);
 	}
 
 	/**
