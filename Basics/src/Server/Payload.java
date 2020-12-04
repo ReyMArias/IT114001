@@ -125,4 +125,24 @@ public class Payload implements Serializable {
 		return String.format("Type[%s], Number[%s], Message[%s]", getPayloadType().toString(), getNumber(),
 				getMessage());
 	}
+
+	private GameState gameState;
+
+	public void setState(GameState state) {
+		gameState = state;
+	}
+
+	public GameState getState() {
+		return gameState;
+	}
+
+	private long time;
+
+	public void setTime(long t) {
+		time = t;
+	}
+
+	public long getTime() {
+		return time;
+	}
 }

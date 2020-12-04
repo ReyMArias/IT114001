@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import Server.GameState;
 import Server.Payload;
 import Server.PayloadType;
 
@@ -186,6 +187,26 @@ public enum SocketClient {
 		}
 	}
 
+	private void setGameState(GameState state) {
+		Iterator<Event> iter = events.iterator();
+		while (iter.hasNext()) {
+			Event e = iter.next();
+			if (e != null) {
+				e.onSetGameState(state);
+			}
+		}
+	}
+
+	private void setTimeLeft(long time) {
+		Iterator<Event> iter = events.iterator();
+		while (iter.hasNext()) {
+			Event e = iter.next();
+			if (e != null) {
+				e.onSetTimeLeft(time);
+			}
+		}
+	}
+
 	/***
 	 * Determine any special logic for different PayloadTypes
 	 * 
@@ -221,6 +242,12 @@ public enum SocketClient {
 			break;
 		case TEAM:
 			setPlayerColor(p.getNumber(), p.getClientName());
+			break;
+		case GAME_STATE:
+			setGameState(p.getState());
+			break;
+		case TIME:
+			setTimeLeft(p.getTime());
 			break;
 		default:
 			log.log(Level.WARNING, "unhandled payload on client" + p);

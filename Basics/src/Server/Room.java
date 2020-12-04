@@ -6,6 +6,7 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,6 +17,10 @@ public class Room extends BaseGamePanel implements AutoCloseable {
 	private static SocketServer server;// used to refer to accessible server functions
 	private String name;
 	private final static Logger log = Logger.getLogger(Room.class.getName());
+	private GameState state = GameState.LOBBY;
+	// Time in nanoseconds for better accuracy and why not
+	private final static long TIME_M = TimeUnit.MINUTES.toNanos(1);
+	private final static long ROUND_TIME = TimeUnit.MINUTES.toNanos(5);
 
 	// Commands
 	private final static String COMMAND_TRIGGER = "/";
@@ -26,6 +31,10 @@ public class Room extends BaseGamePanel implements AutoCloseable {
 	static Dimension gameAreaSize = new Dimension(800, 800);
 	private final static int TEAM_A = 1;
 	private final static int TEAM_B = 2;
+	private long timeLeft = ROUND_TIME;
+	private int minutesLeft = 5;
+	private long currentGS = 0;
+	private long prevGS = currentGS;
 
 	public Room(String name, boolean delayStart) {
 		super(delayStart);
@@ -226,10 +235,12 @@ public class Room extends BaseGamePanel implements AutoCloseable {
 
 	protected void joinRoom(String room, ServerThread client) {
 		server.joinRoom(room, client);
+		state = GameState.LOBBY;
 	}
 
 	protected void joinLobby(ServerThread client) {
 		server.joinLobby(client);
+		state = GameState.LOBBY;
 	}
 
 	protected void createRoom(String room, ServerThread client) {
@@ -312,6 +323,15 @@ public class Room extends BaseGamePanel implements AutoCloseable {
 				ready++;
 			}
 		}
+		if (ready >= total) {
+			// start
+			System.out.println("Everyone's ready, let's do this!");
+			state = GameState.GAME;
+			broadcastGameState();
+			currentGS = System.nanoTime();
+			prevGS = currentGS;
+			log.log(Level.INFO, "Game has begun in room " + name);
+		}
 	}
 
 	protected void sendConnectionStatus(ServerThread client, boolean isConnect, String message) {
@@ -358,6 +378,8 @@ public class Room extends BaseGamePanel implements AutoCloseable {
 	 * @param dir
 	 */
 	protected void sendDirectionSync(ServerThread sender, Point dir) {
+		if (state != GameState.GAME)
+			return;
 		boolean changed = false;
 		// first we'll find the clientPlayer that sent their direction
 		// and update the server-side instance of their direction
@@ -466,6 +488,25 @@ public class Room extends BaseGamePanel implements AutoCloseable {
 
 	@Override
 	public void update() {
+
+		if (state != GameState.GAME)
+			timeLeft = ROUND_TIME;
+
+		prevGS = currentGS;
+		currentGS = System.nanoTime();
+		timeLeft -= (currentGS - prevGS);
+
+		if ((timeLeft / TIME_M) < minutesLeft && state == GameState.GAME) {
+			minutesLeft--;
+			broadcastTimeLeft();
+		}
+
+		if (timeLeft <= 0 && state != GameState.END) {
+			state = GameState.END;
+			broadcastGameState();
+			return;
+		}
+
 		// We'll make the server authoritative
 		// so we'll calc movement/collisions and send the action to the clients so they
 		// can visually update. Client's won't be determining this themselves
@@ -480,6 +521,24 @@ public class Room extends BaseGamePanel implements AutoCloseable {
 			}
 		}
 
+	}
+
+	private void broadcastTimeLeft() {
+		Iterator<ClientPlayer> iter = clients.iterator();
+		while (iter.hasNext()) {
+			ClientPlayer c = iter.next();
+			c.client.sendTimeLeft(timeLeft);
+			log.log(Level.INFO, timeLeft / TIME_M + " minutes left");
+		}
+	}
+
+	private void broadcastGameState() {
+		Iterator<ClientPlayer> iter = clients.iterator();
+		while (iter.hasNext()) {
+			ClientPlayer c = iter.next();
+			c.client.sendGameState(state);
+			log.log(Level.INFO, "Sending client " + c.player.getId() + " game status " + state.toString());
+		}
 	}
 
 	// don't call this more than once per frame

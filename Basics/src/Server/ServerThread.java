@@ -159,6 +159,20 @@ public class ServerThread extends Thread {
 		return sendPayload(payload);
 	}
 
+	protected boolean sendGameState(GameState state) {
+		Payload payload = new Payload();
+		payload.setPayloadType(PayloadType.GAME_STATE);
+		payload.setState(state);
+		return sendPayload(payload);
+	}
+
+	protected boolean sendTimeLeft(long timeLeft) {
+		Payload payload = new Payload();
+		payload.setPayloadType(PayloadType.TIME);
+		payload.setTime(timeLeft);
+		return sendPayload(payload);
+	}
+
 	/***
 	 * Process payloads we receive from our client
 	 * 

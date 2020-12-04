@@ -33,6 +33,8 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ScrollPaneConstants;
 
+import Server.GameState;
+
 public class ClientUI extends JFrame implements Event {
 	/**
 	 * 
@@ -440,5 +442,23 @@ public class ClientUI extends JFrame implements Event {
 		}
 
 		repaint();
+	}
+
+	@Override
+	public void onGameStart(Point startPos, int playerId) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onSetGameState(GameState state) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onSetTimeLeft(long time) {
+		// TODO Auto-generated method stub
+
 	}
 }

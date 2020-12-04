@@ -15,6 +15,7 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,6 +24,7 @@ import javax.swing.InputMap;
 import javax.swing.KeyStroke;
 
 import Core.BaseGamePanel;
+import Server.GameState;
 
 public class GamePanel extends BaseGamePanel implements Event {
 
@@ -37,6 +39,11 @@ public class GamePanel extends BaseGamePanel implements Event {
 	Dimension gameAreaSize = new Dimension();
 	private static int teamAScore = 0;
 	private static int teamBScore = 0;
+	private static final int TEXT_SIZE = 3;
+	private static GameState gameState = GameState.LOBBY;
+	private final static long ROUND_TIME = TimeUnit.MINUTES.toNanos(5);
+	public final static long MINUTE = TimeUnit.MINUTES.toNanos(1);
+	private static long timeLeft = ROUND_TIME;
 
 	public void setPlayerName(String name) {
 		playerUsername = name;
@@ -209,9 +216,21 @@ public class GamePanel extends BaseGamePanel implements Event {
 		if (myPlayer != null) {
 			g.drawString("Debug MyPlayer: " + myPlayer.toString(), 10, 20);
 		}
-		g.drawString("Team A Score: " + teamAScore, gameAreaSize.width / 3, 50);
-		g.drawString("Team B Score: " + teamBScore, (int) (gameAreaSize.width * 0.667), 50);
 
+		if (gameState == GameState.GAME) {
+			String timeLeftStr = "Time Left: " + (timeLeft / MINUTE) + "min left!";
+			g.setColor(Color.WHITE);
+			g.setFont(new Font("Monospaced", Font.BOLD, 24));
+			g.drawString(timeLeftStr, gameAreaSize.width * 2, 25);
+			g.drawString("Team A Score: " + teamAScore, gameAreaSize.width / 3, 50);
+			g.drawString("Team B Score: " + teamBScore, (int) (gameAreaSize.width * 0.667), 50);
+		} else {
+			String notStartedStr = "Game has not started yet!";
+			int offset = (gameAreaSize.width / 2) - (notStartedStr.length() * TEXT_SIZE);
+			g.setColor(Color.WHITE);
+			g.setFont(new Font("Monospaced", Font.BOLD, 24));
+			g.drawString(notStartedStr, offset, 50);
+		}
 	}
 
 	private void drawUI(Graphics2D g2) {
@@ -320,6 +339,29 @@ public class GamePanel extends BaseGamePanel implements Event {
 		}
 
 		repaint();
+	}
+
+	@Override
+	public void onGameStart(Point startPos, int playerId) {
+		for (Player player : players) {
+			if (player.getId() == playerId) {
+				player.setPosition(startPos);
+
+				break;
+			}
+		}
+
+		repaint();
+	}
+
+	@Override
+	public void onSetGameState(GameState state) {
+		gameState = state;
+	}
+
+	@Override
+	public void onSetTimeLeft(long time) {
+		timeLeft = time;
 	}
 
 }
