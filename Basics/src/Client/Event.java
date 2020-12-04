@@ -2,6 +2,8 @@ package Client;
 
 import java.awt.Point;
 
+import Server.GameState;
+
 public interface Event {
 	void onClientConnect(String clientName, String message);
 
@@ -22,4 +24,10 @@ public interface Event {
 	void onChangeTeam(int number);
 
 	void onSetPlayerColor(int teamId, String clientName);
+
+	void onGameStart(Point startPos, int playerId);
+
+	void onSetGameState(GameState state);
+
+	void onSetTimeLeft(long time);
 }
