@@ -17,8 +17,7 @@ import Server.Payload;
 import Server.PayloadType;
 
 public enum SocketClient {
-	INSTANCE; // see https://dzone.com/articles/java-singletons-using-enum "Making Singletons
-	// with Enum"
+	INSTANCE;
 
 	private static Socket server;
 	private static Thread fromServerThread;
@@ -207,6 +206,26 @@ public enum SocketClient {
 		}
 	}
 
+	private void setGameBoundary(Point point) {
+		Iterator<Event> iter = events.iterator();
+		while (iter.hasNext()) {
+			Event e = iter.next();
+			if (e != null) {
+				e.onSetGameBoundary(point.x, point.y);
+			}
+		}
+	}
+
+	private void setPlayerGhost(boolean bool) {
+		Iterator<Event> iter = events.iterator();
+		while (iter.hasNext()) {
+			Event e = iter.next();
+			if (e != null) {
+				e.onSetPlayerGhost(bool);
+			}
+		}
+	}
+
 	/***
 	 * Determine any special logic for different PayloadTypes
 	 * 
@@ -248,6 +267,12 @@ public enum SocketClient {
 			break;
 		case TIME:
 			setTimeLeft(p.getTime());
+			break;
+		case WALLS:
+			setGameBoundary(p.getPoint());
+			break;
+		case SET_GHOST:
+			setPlayerGhost(p.getBool());
 			break;
 		default:
 			log.log(Level.WARNING, "unhandled payload on client" + p);

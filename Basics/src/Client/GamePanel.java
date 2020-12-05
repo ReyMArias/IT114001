@@ -12,6 +12,8 @@ import java.awt.Stroke;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -39,11 +41,71 @@ public class GamePanel extends BaseGamePanel implements Event {
 	Dimension gameAreaSize = new Dimension();
 	private static int teamAScore = 0;
 	private static int teamBScore = 0;
+
+	private int mouse_x, mouse_y;
+	private String str = "";
+
 	private static final int TEXT_SIZE = 3;
 	private static GameState gameState = GameState.LOBBY;
 	private final static long ROUND_TIME = TimeUnit.MINUTES.toNanos(5);
 	public final static long MINUTE = TimeUnit.MINUTES.toNanos(1);
 	private static long timeLeft = ROUND_TIME;
+	private static Dimension boundary;
+
+	public void MouseXY() {
+		addMouseListener((MouseListener) this);
+		addMouseMotionListener((MouseMotionListener) this);
+	}
+
+	public void mousePressed(MouseEvent e) {
+		mouse_x = e.getX();
+		mouse_y = e.getY();
+		str = "Mouse Pressed";
+		repaint();
+	}
+
+	public void mouseReleased(MouseEvent e) {
+		mouse_x = e.getX();
+		mouse_y = e.getY();
+		str = "Mouse Released";
+		repaint();
+	}
+
+	public void mouseClicked(MouseEvent e) {
+		mouse_x = e.getX();
+		mouse_y = e.getY();
+		str = "Mouse Clicked";
+		repaint();
+	}
+
+	public void mouseEntered(MouseEvent e) {
+		mouse_x = e.getX();
+		mouse_y = e.getY();
+		str = "Mouse Entered";
+		repaint();
+	}
+
+	public void mouseExited(MouseEvent e) {
+		mouse_x = e.getX();
+		mouse_y = e.getY();
+		str = "Mouse Exited";
+		repaint();
+	}
+
+	// override MouseMotionListener two abstract methods
+	public void mouseMoved(MouseEvent e) {
+		mouse_x = e.getX();
+		mouse_y = e.getY();
+		str = "Mouse Moved";
+		repaint();
+	}
+
+	public void mouseDragged(MouseEvent e) {
+		mouse_x = e.getX();
+		mouse_y = e.getY();
+		str = "Mouse dragged";
+		repaint();
+	}
 
 	public void setPlayerName(String name) {
 		playerUsername = name;
@@ -200,6 +262,14 @@ public class GamePanel extends BaseGamePanel implements Event {
 		drawUI((Graphics2D) g);
 	}
 
+	private void drawBorder(Graphics g) {
+		if (boundary != null) {
+			g.setColor(Color.WHITE);
+			g.drawRect(5, 5, boundary.width - 10, boundary.height - 10);
+		}
+
+	}
+
 	private synchronized void drawPlayers(Graphics g) {
 		Iterator<Player> iter = players.iterator();
 		while (iter.hasNext()) {
@@ -221,12 +291,18 @@ public class GamePanel extends BaseGamePanel implements Event {
 			String timeLeftStr = "Time Left: " + (timeLeft / MINUTE) + "min left!";
 			g.setColor(Color.WHITE);
 			g.setFont(new Font("Monospaced", Font.BOLD, 24));
-			g.drawString(timeLeftStr, gameAreaSize.width * 2, 25);
-			g.drawString("Team A Score: " + teamAScore, gameAreaSize.width / 3, 50);
-			g.drawString("Team B Score: " + teamBScore, (int) (gameAreaSize.width * 0.667), 50);
+			g.drawString(timeLeftStr, boundary.width / 2, 50);
+			g.drawString("Team A Score: " + teamAScore, boundary.width / 3, 70);
+			g.drawString("Team B Score: " + teamBScore, (int) (boundary.width * 0.667), 70);
+
+			g.fillOval(mouse_x, mouse_y, 10, 10); // gives the bullet
+			g.drawString(mouse_x + "," + mouse_y, mouse_x + 10, mouse_y - 10); // displays the x and y position
+			g.drawString(str, mouse_x + 10, mouse_y + 20); // displays the action performed
+			g.drawString(str, boundary.width / 2, boundary.height / 2);
+
 		} else {
 			String notStartedStr = "Game has not started yet!";
-			int offset = (gameAreaSize.width / 2) - (notStartedStr.length() * TEXT_SIZE);
+			int offset = (boundary.width / 2) - (notStartedStr.length() * TEXT_SIZE);
 			g.setColor(Color.WHITE);
 			g.setFont(new Font("Monospaced", Font.BOLD, 24));
 			g.drawString(notStartedStr, offset, 50);
@@ -362,6 +438,19 @@ public class GamePanel extends BaseGamePanel implements Event {
 	@Override
 	public void onSetTimeLeft(long time) {
 		timeLeft = time;
+	}
+
+	@Override
+	public void onSetGameBoundary(int x, int y) {
+		boundary = new Dimension(x, y);
+	}
+
+	@Override
+	public void onSetPlayerGhost(boolean bool) {
+		for (Player player : players) {
+			player.setActive(bool);
+		}
+
 	}
 
 }

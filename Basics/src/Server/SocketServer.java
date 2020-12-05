@@ -10,7 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class SocketServer {
-	int port = 3000;
+	int port = 3002;
 	public static boolean isRunning = false;
 	private List<Room> rooms = new ArrayList<Room>();
 	private Room lobby;// here for convenience

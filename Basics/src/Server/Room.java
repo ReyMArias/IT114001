@@ -35,6 +35,8 @@ public class Room extends BaseGamePanel implements AutoCloseable {
 	private int minutesLeft = 5;
 	private long currentGS = 0;
 	private long prevGS = currentGS;
+	private int teamA = 0;
+	private int teamB = 0;
 
 	public Room(String name, boolean delayStart) {
 		super(delayStart);
@@ -63,11 +65,14 @@ public class Room extends BaseGamePanel implements AutoCloseable {
 		if (playerId % 2 == 0) {
 			clientPlayer.player.setTeam(TEAM_A);
 			clientPlayer.client.sendTeamInfo(TEAM_A, name);
+			teamA++;
 		} else {
 
 			clientPlayer.player.setTeam(TEAM_B);
 			clientPlayer.client.sendTeamInfo(TEAM_B, name);
+			teamB++;
 		}
+		clientPlayer.client.sendBoundary(gameAreaSize);
 	}
 
 	private static Point getRandomStartPosition() {
@@ -150,6 +155,7 @@ public class Room extends BaseGamePanel implements AutoCloseable {
 			updateClientList(cp.client);
 			// get dir/pos of existing players
 			updatePlayers(cp.client);
+			broadcastSetPlayersGhost();
 
 		}
 	}
@@ -300,6 +306,9 @@ public class Room extends BaseGamePanel implements AutoCloseable {
 					break;
 				case READY:
 					cp = getCP(client);
+					if (name.equals("Lobby")) {
+						break;
+					}
 					if (cp != null) {
 						cp.player.setReady(true);
 						readyCheck();
@@ -329,6 +338,7 @@ public class Room extends BaseGamePanel implements AutoCloseable {
 			state = GameState.GAME;
 			broadcastGameState();
 			currentGS = System.nanoTime();
+			broadcastSetPlayersAlive();
 			prevGS = currentGS;
 			log.log(Level.INFO, "Game has begun in room " + name);
 		}
@@ -504,6 +514,14 @@ public class Room extends BaseGamePanel implements AutoCloseable {
 		if (timeLeft <= 0 && state != GameState.END) {
 			state = GameState.END;
 			broadcastGameState();
+			broadcastSetPlayersGhost();
+			return;
+		}
+
+		if ((teamA <= 0 || teamB <= 0) && state != GameState.END) {
+			state = GameState.END;
+			broadcastGameState();
+			broadcastSetPlayersGhost();
 			return;
 		}
 
@@ -538,6 +556,56 @@ public class Room extends BaseGamePanel implements AutoCloseable {
 			ClientPlayer c = iter.next();
 			c.client.sendGameState(state);
 			log.log(Level.INFO, "Sending client " + c.player.getId() + " game status " + state.toString());
+		}
+	}
+
+	private void broadcastSetPlayersGhost() {
+		Iterator<ClientPlayer> iter = clients.iterator();
+		while (iter.hasNext()) {
+			ClientPlayer c = iter.next();
+			c.player.setActive(false);
+			c.client.sendGhostStatus(false);
+			log.log(Level.INFO, "Set client " + c.player.getId() + " inactive!");
+		}
+	}
+
+	private void broadcastSetPlayersAlive() {
+		Iterator<ClientPlayer> iter = clients.iterator();
+		while (iter.hasNext()) {
+			ClientPlayer c = iter.next();
+			c.player.setActive(true);
+			c.client.sendGhostStatus(true);
+			log.log(Level.INFO, "Set client " + c.player.getId() + " active!");
+		}
+	}
+
+	private void broadcastPlayerHit() {
+		Iterator<ClientPlayer> iter = clients.iterator();
+		while (iter.hasNext()) {
+			ClientPlayer c = iter.next();
+			c.player.setActive(true);
+			c.client.sendGhostStatus(true);
+			log.log(Level.INFO, c.player.getId() + " hit " + c.player.getId());
+		}
+	}
+
+	private void broadcastPlayerEliminated() {
+		Iterator<ClientPlayer> iter = clients.iterator();
+		while (iter.hasNext()) {
+			ClientPlayer c = iter.next();
+			c.player.setActive(true);
+			c.client.sendGhostStatus(true);
+			log.log(Level.INFO, c.player.getId() + " eliminated " + c.player.getId());
+		}
+	}
+
+	private void broadcastLastStanding() {
+		Iterator<ClientPlayer> iter = clients.iterator();
+		while (iter.hasNext()) {
+			ClientPlayer c = iter.next();
+			c.player.setActive(true);
+			c.client.sendGhostStatus(true);
+			log.log(Level.INFO, c.player.getId() + " is last alive on their team");
 		}
 	}
 

@@ -30,4 +30,8 @@ public interface Event {
 	void onSetGameState(GameState state);
 
 	void onSetTimeLeft(long time);
+
+	void onSetGameBoundary(int x, int y);
+
+	void onSetPlayerGhost(boolean bool);
 }

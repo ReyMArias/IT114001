@@ -14,7 +14,7 @@ public abstract class GameObject implements Serializable {
 	protected Point previousPosition = new Point(0, 0);
 	protected Point speed = new Point(2, 2);
 	protected Point direction = new Point(0, 0);
-	protected Dimension size = new Dimension(25, 25);
+	public Dimension size = new Dimension(25, 25);
 	protected String name = "";
 	protected boolean isActive = true;
 	protected int team = 0;
