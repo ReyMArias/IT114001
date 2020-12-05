@@ -145,4 +145,14 @@ public class Payload implements Serializable {
 	public long getTime() {
 		return time;
 	}
+
+	private boolean boolVal;
+
+	public void setBool(boolean b) {
+		boolVal = b;
+	}
+
+	public boolean getBool() {
+		return boolVal;
+	}
 }

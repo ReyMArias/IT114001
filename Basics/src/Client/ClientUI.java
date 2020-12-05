@@ -46,6 +46,7 @@ public class ClientUI extends JFrame implements Event {
 	JPanel userPanel;
 	List<User> users = new ArrayList<User>();
 	private final static Logger log = Logger.getLogger(ClientUI.class.getName());
+	private static Dimension gamePanelSize = new Dimension(0, 0);
 	Dimension windowSize = Toolkit.getDefaultToolkit().getScreenSize();
 	GamePanel game;
 	String username;
@@ -446,18 +447,27 @@ public class ClientUI extends JFrame implements Event {
 
 	@Override
 	public void onGameStart(Point startPos, int playerId) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void onSetGameState(GameState state) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void onSetTimeLeft(long time) {
+	}
+
+	@Override
+	public void onSetGameBoundary(int x, int y) {
+		gamePanelSize.width = x;
+		gamePanelSize.height = y;
+
+		game.setPreferredSize(gamePanelSize);
+		revalidate();
+	}
+
+	@Override
+	public void onSetPlayerGhost(boolean bool) {
 		// TODO Auto-generated method stub
 
 	}

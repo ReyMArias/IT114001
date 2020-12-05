@@ -173,6 +173,20 @@ public class ServerThread extends Thread {
 		return sendPayload(payload);
 	}
 
+	protected boolean sendBoundary(Dimension gameAreaSize) {
+		Payload payload = new Payload();
+		payload.setPayloadType(PayloadType.WALLS);
+		payload.setPoint(new Point(gameAreaSize.width, gameAreaSize.height));
+		return sendPayload(payload);
+	}
+
+	protected boolean sendGhostStatus(boolean b) {
+		Payload payload = new Payload();
+		payload.setPayloadType(PayloadType.SET_GHOST);
+		payload.setBool(b);
+		return sendPayload(payload);
+	}
+
 	/***
 	 * Process payloads we receive from our client
 	 * 
