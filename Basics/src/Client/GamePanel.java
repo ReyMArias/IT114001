@@ -432,4 +432,20 @@ public class GamePanel extends BaseGamePanel implements Event {
 
 	}
 
+	@Override
+	public void onSetHP(Point health) {
+		if (health.x == 0) {
+			for (Player player : players) {
+				player.setHP(health.y);
+			}
+		} else {
+			for (Player player : players) {
+				if (player.getId() == health.x) {
+					player.setHP(health.y);
+					return;
+				}
+			}
+		}
+	}
+
 }

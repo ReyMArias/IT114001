@@ -226,6 +226,16 @@ public enum SocketClient {
 		}
 	}
 
+	private void setHP(Point health) {
+		Iterator<Event> iter = events.iterator();
+		while (iter.hasNext()) {
+			Event e = iter.next();
+			if (e != null) {
+				e.onSetHP(health);
+			}
+		}
+	}
+
 	/***
 	 * Determine any special logic for different PayloadTypes
 	 * 
@@ -273,6 +283,9 @@ public enum SocketClient {
 			break;
 		case SET_GHOST:
 			setPlayerGhost(p.getBool());
+			break;
+		case SET_HP:
+			setHP(p.getPoint());
 			break;
 		default:
 			log.log(Level.WARNING, "unhandled payload on client" + p);

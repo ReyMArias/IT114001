@@ -187,6 +187,13 @@ public class ServerThread extends Thread {
 		return sendPayload(payload);
 	}
 
+	protected boolean sendHP(int id, int health) {
+		Payload payload = new Payload();
+		payload.setPayloadType(PayloadType.SET_HP);
+		payload.setPoint(new Point(id, health));
+		return sendPayload(payload);
+	}
+
 	/***
 	 * Process payloads we receive from our client
 	 * 

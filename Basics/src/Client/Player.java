@@ -18,11 +18,11 @@ public class Player extends GameObject implements Serializable {
 	private Point nameOffset = new Point(0, -5);
 	private boolean isReady = false;
 	private Point barrel = new Point(position.x + (size.width / 2), position.y + (size.height / 2));
-	private int HP = 1;
+	public int HP = 3;
 
 	public void setDirectionLine(Point dir) {
-		barrel.x = dir.x;
-		barrel.y = dir.y;
+		barrel.x = dir.x + 90;
+		barrel.y = dir.y + 90;
 	}
 
 	public void setReady(boolean r) {
@@ -51,8 +51,13 @@ public class Player extends GameObject implements Serializable {
 						position.x + (size.width / 2) + (barrel.x * GUN),
 						position.y + (size.height / 2) + (barrel.y * GUN));
 			}
+
 		}
-		return true;
+		if (HP <= 0) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 
 	@Override
@@ -84,4 +89,13 @@ public class Player extends GameObject implements Serializable {
 	public void setColor(Color teamColor) {
 		color = teamColor;
 	}
+
+	public int getHP() {
+		return HP;
+	}
+
+	public void setHP(int health) {
+		HP = health;
+	}
+
 }

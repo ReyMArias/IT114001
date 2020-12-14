@@ -14,6 +14,7 @@ public class Payload implements Serializable {
 		private static final long serialVersionUID = -6687715510484845706L;
 		private int teamId = 0;
 		private int playerId;
+		private int HP = 0;
 
 		public void setTeamId(int id) {
 			teamId = id;
