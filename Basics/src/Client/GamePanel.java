@@ -24,6 +24,7 @@ import javax.swing.InputMap;
 import javax.swing.KeyStroke;
 
 import Core.BaseGamePanel;
+import Core.Projectile;
 import Server.GameState;
 
 public class GamePanel extends BaseGamePanel implements Event {
@@ -55,6 +56,12 @@ public class GamePanel extends BaseGamePanel implements Event {
 		if (myPlayer != null) {
 			myPlayer.setName(playerUsername);
 		}
+	}
+
+	private ArrayList<Projectile> balls = new ArrayList<Projectile>();
+
+	public ArrayList getProjectiles() {
+		return balls;
 	}
 
 	@Override
@@ -175,6 +182,10 @@ public class GamePanel extends BaseGamePanel implements Event {
 			if (KeyStates.RIGHTARROW) {
 				degrees = degrees + 36;
 			}
+
+			if (KeyStates.SPACE) {
+				shoot();
+			}
 			/*
 			 * if (KeyStates.LEFTARROW) { x = -1; } else if (KeyStates.RIGHTARROW) { x = 1;
 			 * } if (!KeyStates.LEFTARROW && !KeyStates.RIGHTARROW) { x = 0; }
@@ -203,6 +214,11 @@ public class GamePanel extends BaseGamePanel implements Event {
 		}
 	}
 
+	public void shoot() {
+		Projectile p = new Projectile(myPlayer.shotX, myPlayer.shotY);
+		balls.add(p);
+	}
+
 	@Override
 	public void lateUpdate() {
 		// stuff that should happen at a slightly different time than stuff in normal
@@ -217,6 +233,18 @@ public class GamePanel extends BaseGamePanel implements Event {
 		drawPlayers(g);
 		drawText(g);
 		drawUI((Graphics2D) g);
+		drawBalls(g);
+	}
+
+	private void drawBalls(Graphics g) {
+
+		ArrayList balls = getProjectiles();
+		for (int i = 0; i < balls.size(); i++) {
+			Projectile p = (Projectile) balls.get(i);
+			g.setColor(Color.WHITE);
+			g.fillRect(p.getX(), p.getY(), 10, 5);
+		}
+
 	}
 
 	private void drawBorder(Graphics g) {
@@ -256,6 +284,16 @@ public class GamePanel extends BaseGamePanel implements Event {
 			g.drawString(mouse_x + "," + mouse_y, mouse_x + 10, mouse_y - 10); // displays the x and y position
 			g.drawString(str, mouse_x + 10, mouse_y + 20); // displays the action performed
 			g.drawString(str, boundary.width / 2, boundary.height / 2);
+
+			ArrayList projectiles = getProjectiles();
+			for (int i = 0; i < projectiles.size(); i++) {
+				Projectile p = (Projectile) projectiles.get(i);
+				if (p.isVisible() == true) {
+					p.update();
+				} else {
+					projectiles.remove(i);
+				}
+			}
 
 		} else {
 			String notStartedStr = "Game has not started yet!";
