@@ -34,4 +34,6 @@ public interface Event {
 	void onSetGameBoundary(int x, int y);
 
 	void onSetPlayerGhost(boolean bool);
+
+	void onSetHP(Point health);
 }

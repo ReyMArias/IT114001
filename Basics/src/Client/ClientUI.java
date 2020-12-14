@@ -469,6 +469,11 @@ public class ClientUI extends JFrame implements Event {
 	@Override
 	public void onSetPlayerGhost(boolean bool) {
 		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void onSetHP(Point health) {
+		// TODO Auto-generated method stub
 
 	}
 }

@@ -12,8 +12,6 @@ import java.awt.Stroke;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -26,6 +24,7 @@ import javax.swing.InputMap;
 import javax.swing.KeyStroke;
 
 import Core.BaseGamePanel;
+import Core.Projectile;
 import Server.GameState;
 
 public class GamePanel extends BaseGamePanel implements Event {
@@ -52,66 +51,17 @@ public class GamePanel extends BaseGamePanel implements Event {
 	private static long timeLeft = ROUND_TIME;
 	private static Dimension boundary;
 
-	public void MouseXY() {
-		addMouseListener((MouseListener) this);
-		addMouseMotionListener((MouseMotionListener) this);
-	}
-
-	public void mousePressed(MouseEvent e) {
-		mouse_x = e.getX();
-		mouse_y = e.getY();
-		str = "Mouse Pressed";
-		repaint();
-	}
-
-	public void mouseReleased(MouseEvent e) {
-		mouse_x = e.getX();
-		mouse_y = e.getY();
-		str = "Mouse Released";
-		repaint();
-	}
-
-	public void mouseClicked(MouseEvent e) {
-		mouse_x = e.getX();
-		mouse_y = e.getY();
-		str = "Mouse Clicked";
-		repaint();
-	}
-
-	public void mouseEntered(MouseEvent e) {
-		mouse_x = e.getX();
-		mouse_y = e.getY();
-		str = "Mouse Entered";
-		repaint();
-	}
-
-	public void mouseExited(MouseEvent e) {
-		mouse_x = e.getX();
-		mouse_y = e.getY();
-		str = "Mouse Exited";
-		repaint();
-	}
-
-	// override MouseMotionListener two abstract methods
-	public void mouseMoved(MouseEvent e) {
-		mouse_x = e.getX();
-		mouse_y = e.getY();
-		str = "Mouse Moved";
-		repaint();
-	}
-
-	public void mouseDragged(MouseEvent e) {
-		mouse_x = e.getX();
-		mouse_y = e.getY();
-		str = "Mouse dragged";
-		repaint();
-	}
-
 	public void setPlayerName(String name) {
 		playerUsername = name;
 		if (myPlayer != null) {
 			myPlayer.setName(playerUsername);
 		}
+	}
+
+	private ArrayList<Projectile> balls = new ArrayList<Projectile>();
+
+	public ArrayList getProjectiles() {
+		return balls;
 	}
 
 	@Override
@@ -202,9 +152,11 @@ public class GamePanel extends BaseGamePanel implements Event {
 	/**
 	 * Gets the current state of input to apply movement to our player
 	 */
+	public double degrees = 90.0;
+	public int x = 0, y = 0;
+
 	private void applyControls() {
 		if (myPlayer != null) {
-			int x = 0, y = 0;
 			if (KeyStates.W) {
 				y = -1;
 			}
@@ -222,6 +174,22 @@ public class GamePanel extends BaseGamePanel implements Event {
 			if (!KeyStates.A && !KeyStates.D) {
 				x = 0;
 			}
+
+			if (KeyStates.LEFTARROW) {
+				degrees = degrees - 36;
+			}
+
+			if (KeyStates.RIGHTARROW) {
+				degrees = degrees + 36;
+			}
+
+			if (KeyStates.SPACE) {
+				shoot();
+			}
+			/*
+			 * if (KeyStates.LEFTARROW) { x = -1; } else if (KeyStates.RIGHTARROW) { x = 1;
+			 * } if (!KeyStates.LEFTARROW && !KeyStates.RIGHTARROW) { x = 0; }
+			 */
 			boolean changed = myPlayer.setDirection(x, y);
 			if (changed) {
 				// only send data if direction changed, otherwise we're creating unnecessary
@@ -246,6 +214,11 @@ public class GamePanel extends BaseGamePanel implements Event {
 		}
 	}
 
+	public void shoot() {
+		Projectile p = new Projectile(myPlayer.shotX, myPlayer.shotY);
+		balls.add(p);
+	}
+
 	@Override
 	public void lateUpdate() {
 		// stuff that should happen at a slightly different time than stuff in normal
@@ -260,6 +233,18 @@ public class GamePanel extends BaseGamePanel implements Event {
 		drawPlayers(g);
 		drawText(g);
 		drawUI((Graphics2D) g);
+		drawBalls(g);
+	}
+
+	private void drawBalls(Graphics g) {
+
+		ArrayList balls = getProjectiles();
+		for (int i = 0; i < balls.size(); i++) {
+			Projectile p = (Projectile) balls.get(i);
+			g.setColor(Color.WHITE);
+			g.fillRect(p.getX(), p.getY(), 10, 5);
+		}
+
 	}
 
 	private void drawBorder(Graphics g) {
@@ -300,6 +285,16 @@ public class GamePanel extends BaseGamePanel implements Event {
 			g.drawString(str, mouse_x + 10, mouse_y + 20); // displays the action performed
 			g.drawString(str, boundary.width / 2, boundary.height / 2);
 
+			ArrayList projectiles = getProjectiles();
+			for (int i = 0; i < projectiles.size(); i++) {
+				Projectile p = (Projectile) projectiles.get(i);
+				if (p.isVisible() == true) {
+					p.update();
+				} else {
+					projectiles.remove(i);
+				}
+			}
+
 		} else {
 			String notStartedStr = "Game has not started yet!";
 			int offset = (boundary.width / 2) - (notStartedStr.length() * TEXT_SIZE);
@@ -327,12 +322,25 @@ public class GamePanel extends BaseGamePanel implements Event {
 		InputMap im = this.getRootPane().getInputMap();
 		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_W, 0, false), "up_pressed");
 		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_W, 0, true), "up_released");
+
 		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_S, 0, false), "down_pressed");
 		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_S, 0, true), "down_released");
+
 		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_A, 0, false), "left_pressed");
 		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_A, 0, true), "left_released");
+
 		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_D, 0, false), "right_pressed");
 		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_D, 0, true), "right_released");
+
+		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0, false), "left_arrow_pressed");
+		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0, true), "left_arrow_released");
+
+		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0, false), "right_arrow_pressed");
+		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0, true), "right_arrow_released");
+
+		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0, false), "space_pressed");
+		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0, true), "space_released");
+
 		ActionMap am = this.getRootPane().getActionMap();
 
 		am.put("up_pressed", new MoveAction(KeyEvent.VK_W, true));
@@ -346,6 +354,15 @@ public class GamePanel extends BaseGamePanel implements Event {
 
 		am.put("right_pressed", new MoveAction(KeyEvent.VK_D, true));
 		am.put("right_released", new MoveAction(KeyEvent.VK_D, false));
+
+		am.put("left_arrow_pressed", new MoveAction(KeyEvent.VK_LEFT, true));
+		am.put("left_arrow_released", new MoveAction(KeyEvent.VK_LEFT, false));
+
+		am.put("right_arrow_pressed", new MoveAction(KeyEvent.VK_RIGHT, true));
+		am.put("right_arrow_released", new MoveAction(KeyEvent.VK_RIGHT, false));
+
+		am.put("space_pressed", new MoveAction(KeyEvent.VK_SPACE, true));
+		am.put("space_released", new MoveAction(KeyEvent.VK_SPACE, false));
 	}
 
 	@Override
@@ -451,6 +468,22 @@ public class GamePanel extends BaseGamePanel implements Event {
 			player.setActive(bool);
 		}
 
+	}
+
+	@Override
+	public void onSetHP(Point health) {
+		if (health.x == 0) {
+			for (Player player : players) {
+				player.setHP(health.y);
+			}
+		} else {
+			for (Player player : players) {
+				if (player.getId() == health.x) {
+					player.setHP(health.y);
+					return;
+				}
+			}
+		}
 	}
 
 }

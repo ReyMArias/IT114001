@@ -37,6 +37,7 @@ public class Room extends BaseGamePanel implements AutoCloseable {
 	private long prevGS = currentGS;
 	private int teamA = 0;
 	private int teamB = 0;
+	private int HP = 3;
 
 	public Room(String name, boolean delayStart) {
 		super(delayStart);
@@ -127,6 +128,7 @@ public class Room extends BaseGamePanel implements AutoCloseable {
 			// that's so we don't have to keep track of the same client in two different
 			// list locations
 			client.sendTeamInfo(p.getId() % 2, p.getName());
+			p.setHP(HP);
 			syncClient(cp);
 
 		}
@@ -340,6 +342,7 @@ public class Room extends BaseGamePanel implements AutoCloseable {
 			currentGS = System.nanoTime();
 			broadcastSetPlayersAlive();
 			prevGS = currentGS;
+			broadcastHP(0, HP);
 			log.log(Level.INFO, "Game has begun in room " + name);
 		}
 	}
@@ -606,6 +609,14 @@ public class Room extends BaseGamePanel implements AutoCloseable {
 			c.player.setActive(true);
 			c.client.sendGhostStatus(true);
 			log.log(Level.INFO, c.player.getId() + " is last alive on their team");
+		}
+	}
+
+	private void broadcastHP(int id, int health) {
+		Iterator<ClientPlayer> iter = clients.iterator();
+		while (iter.hasNext()) {
+			ClientPlayer c = iter.next();
+			c.client.sendHP(id, health);
 		}
 	}
 
