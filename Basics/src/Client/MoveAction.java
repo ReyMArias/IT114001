@@ -30,6 +30,15 @@ public class MoveAction extends AbstractAction {
 		case KeyEvent.VK_D:
 			KeyStates.D = pressed;
 			break;
+		case KeyEvent.VK_SPACE:
+			KeyStates.SPACE = pressed;
+			break;
+		case KeyEvent.VK_LEFT:
+			KeyStates.LEFTARROW = pressed;
+			break;
+		case KeyEvent.VK_RIGHT:
+			KeyStates.RIGHTARROW = pressed;
+			break;
 		}
 	}
 }

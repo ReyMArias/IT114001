@@ -11,6 +11,15 @@ public class Projectile extends GameObject {
 	private Point direction = new Point(0, 0);
 	private int radius = 2;
 	private int team = 0;
+	private int x, y, speed;
+	private boolean visible;
+
+	public Projectile(int startX, int startY) {
+		x = startX;
+		y = startY;
+		speed = 10;
+		visible = true;
+	}
 
 	private void getCollidingPlayers(List<ClientPlayer> clientPlayers) {
 
@@ -21,6 +30,6 @@ public class Projectile extends GameObject {
 	}
 
 	public void update() {
-
+		x += speed;
 	}
 }
