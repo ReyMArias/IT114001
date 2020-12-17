@@ -47,6 +47,7 @@ public class ClientUI extends JFrame implements Event {
 	List<User> users = new ArrayList<User>();
 	private final static Logger log = Logger.getLogger(ClientUI.class.getName());
 	private static Dimension gamePanelSize = new Dimension(0, 0);
+	public static ClientUI Instance;
 	Dimension windowSize = Toolkit.getDefaultToolkit().getScreenSize();
 	GamePanel game;
 	String username;
@@ -232,8 +233,8 @@ public class ClientUI extends JFrame implements Event {
 		this.add(roomsPanel, "rooms");
 	}
 
-	void addClient(String name) {
-		User u = new User(name);
+	void addClient(String name, int score) {
+		User u = new User(name, score, "<font color=purple>%s</font>");
 		Dimension p = new Dimension(userPanel.getSize().width, 30);
 		u.setPreferredSize(p);
 		u.setMinimumSize(p);
@@ -350,10 +351,30 @@ public class ClientUI extends JFrame implements Event {
 		setVisible(true);
 	}
 
+	public void resortUserList(List<Player> players) {
+		Iterator<User> iter = users.iterator();
+		while (iter.hasNext()) {
+			User u = iter.next();
+			if (u != null) {
+				removeClient(u);
+				iter.remove();
+			}
+		}
+		players.sort((o1, o2) -> o1.getKicks() - o2.getKicks());
+		Iterator<Player> iter2 = players.iterator();
+		while (iter2.hasNext()) {
+			Player p = iter2.next();
+			if (p != null) {
+				addClient(p.getName(), p.getKicks());
+			}
+		}
+	}
+
 	@Override
 	public void onClientConnect(String clientName, String message) {
 		log.log(Level.INFO, String.format("%s: %s", clientName, message));
-		addClient(clientName);
+		int score = 0;
+		addClient(clientName, score);
 		if (message != null && !message.isBlank()) {
 			self.addMessage(String.format("%s: %s", clientName, message));
 		}
@@ -473,6 +494,12 @@ public class ClientUI extends JFrame implements Event {
 
 	@Override
 	public void onSetHP(Point health) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onToggleLock(boolean isLocked) {
 		// TODO Auto-generated method stub
 
 	}

@@ -21,6 +21,9 @@ public class Player extends GameObject implements Serializable {
 	public int HP = 3;
 	public int shotX = (position.x + (size.width / 2));
 	public int shotY = (position.y + (size.height / 2));
+	private int kicks = 0;
+	boolean isLocked = false;
+	private boolean isKicked = false;
 
 	public void setDirectionLine(Point dir) {
 		barrel.x = dir.x + 90;
@@ -33,6 +36,21 @@ public class Player extends GameObject implements Serializable {
 
 	public boolean isReady() {
 		return isReady;
+	}
+
+	public void setKicked(boolean isKicked) {
+		this.isKicked = isKicked;
+		if (isKicked) {
+			kicks++;
+		}
+	}
+
+	public boolean isKicked() {
+		return isKicked;
+	}
+
+	public int getKicks() {
+		return kicks;
 	}
 
 	/**
@@ -98,6 +116,14 @@ public class Player extends GameObject implements Serializable {
 
 	public void setHP(int health) {
 		HP = health;
+	}
+
+	public void setLocked(boolean l) {
+		isLocked = l;
+	}
+
+	public boolean isLocked() {
+		return isLocked;
 	}
 
 }

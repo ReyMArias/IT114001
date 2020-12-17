@@ -486,4 +486,28 @@ public class GamePanel extends BaseGamePanel implements Event {
 		}
 	}
 
+	@Override
+	public void onToggleLock(boolean isLocked) {
+		// TODO Auto-generated method stub
+		Iterator<Player> iter = players.iterator();
+		while (iter.hasNext()) {
+			Player p = iter.next();
+			if (p != null) {
+				if (p.isLocked() && !isLocked) {
+					p.setDirection(0, 0);
+				}
+				p.setLocked(isLocked);
+				if (isLocked) {
+					p.setDirection(0, 0);
+				}
+
+				p.setKicked(false);
+			}
+		}
+		if (!isLocked) {
+			// here's an ok time to sort the players list in the UI
+			ClientUI.Instance.resortUserList(players);
+		}
+	}
+
 }

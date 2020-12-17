@@ -36,4 +36,6 @@ public interface Event {
 	void onSetPlayerGhost(boolean bool);
 
 	void onSetHP(Point health);
+
+	void onToggleLock(boolean isLocked);
 }

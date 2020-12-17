@@ -194,6 +194,13 @@ public class ServerThread extends Thread {
 		return sendPayload(payload);
 	}
 
+	protected boolean sendToggleLockAll(boolean isLocked) {
+		Payload p = new Payload();
+		p.setPayloadType(PayloadType.TOGGLE_LOCK);
+		p.setFlag(isLocked);
+		return sendPayload(p);
+	}
+
 	/***
 	 * Process payloads we receive from our client
 	 * 
